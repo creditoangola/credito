@@ -1,0 +1,14 @@
+# Crédito.ao
+
+> Plataforma para simular, comparar e pedir crédito em Angola (kwanzas). Não é um banco: a aprovação e as condições finais são do banco.
+
+## Páginas principais
+- [Crédito pessoal](https://credito.ao/credito-pessoal): simulador e informação
+- [Crédito automóvel](https://credito.ao/credito-automovel): simulador e informação
+- [Crédito habitação](https://credito.ao/credito-habitacao): simulador e informação
+- [Bancos](https://credito.ao/bancos): taxas com fonte oficial
+- [Simulador](https://credito.ao/simulador): prestação, total a pagar e TAEG estimada
+- [Pedir crédito](https://credito.ao/pedir-credito): pedido em 5 passos, sem custo
+- [Blog](https://credito.ao/blog): guias sobre documentos, custos, TAEG e intermediários
+- [Sobre nós](https://credito.ao/sobre-nos): quem somos, o que fazemos e o que não fazemos
+- [Contactos](https://credito.ao/contactos): WhatsApp e email

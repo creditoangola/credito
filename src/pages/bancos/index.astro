@@ -1,0 +1,97 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import { BANKS } from '../../data/banks';
+import { SEO } from '../../data/seo';
+import { SITE } from '../../data/site';
+
+const seo = SEO['/bancos'];
+const publicados = BANKS.filter((b) => b.published);
+const faq = [
+  {
+    q: 'Porque é que nem todos os bancos aparecem com dados?',
+    a: 'Só publicamos taxas, documentos e requisitos confirmados em documentos oficiais do banco. Os outros ficam "em validação" até termos a fonte.',
+  },
+  {
+    q: 'Onde posso confirmar as condições de um crédito?',
+    a: 'Na ficha técnica informativa do banco, que indica a taxa, a TAEG e os encargos. Peça-a sempre antes de assinar.',
+  },
+  {
+    q: 'Posso pedir crédito em mais do que um banco?',
+    a: 'Pode. Comparar a TAEG de várias propostas é a melhor forma de escolher. Diga-nos o que precisa e indicamos as opções.',
+  },
+];
+---
+
+<Layout title={seo.title} description={seo.description} form="pessoal" related={{ categoria: 'pessoal' }}>
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Bancos' }]} />
+      <h1>Bancos em Angola: <em>documentos, requisitos e taxas de crédito online</em></h1>
+      <p>{seo.description}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="table-wrap">
+        <table class="data">
+          <caption>Crédito pessoal: o que cada banco publica</caption>
+          <thead>
+            <tr>
+              <th scope="col">Banco</th>
+              <th scope="col">Taxa (TAN)</th>
+              <th scope="col">Prazo máximo</th>
+              <th scope="col">Condições</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              publicados.map((b) => (
+                <tr>
+                  <th scope="row">{b.name}</th>
+                  <td>{b.taxa ? `${b.taxa}%` : 'Não publicada nesta fonte'}</td>
+                  <td>{b.prazoMax ?? 'A confirmar com o banco'}</td>
+                  <td><a href={`/bancos/${b.slug}`}>Ver documentos e requisitos</a></td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h2 style="margin-top:2.4rem">Bancos em <em>validação</em></h2>
+      <ul class="list">
+        {
+          BANKS.filter((b) => !b.published).map((b) => (
+            <li class="list__item">
+              <div>
+                <h3>{b.name}</h3>
+                <p>Só publicamos depois de confirmar na fonte oficial.</p>
+              </div>
+              <span class="pill">Em validação</span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="notice">
+        <p>
+          As taxas mudam. Confirme sempre a ficha técnica informativa em vigor antes de decidir. Esta página é informativa e não é uma oferta de crédito.
+        </p>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--green" href="#pedir">Pedir crédito ao banco certo</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <div class="section__head">
+        <h2>Perguntas frequentes sobre bancos e <em>crédito</em></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+</Layout>

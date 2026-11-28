@@ -1,0 +1,121 @@
+---
+interface Props {
+  produto?: 'pessoal' | 'automovel' | 'habitacao';
+  valor?: number;
+  prazo?: number;
+  taxa?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  maxPrazo?: number;
+  title?: string;
+}
+
+const {
+  produto = 'pessoal',
+  valor = 5000000,
+  prazo = 36,
+  taxa = 22,
+  min = 100000,
+  max = 30000000,
+  step = 50000,
+  maxPrazo = 60,
+  title = 'Simule o crédito online',
+} = Astro.props;
+---
+
+<div class="sim" data-simulator data-produto={produto}>
+  <h2 class="sim__title">{title}</h2>
+
+  <div class="sim__field">
+    <label for={`valor-${produto}`}>Quanto precisa <output data-out="valor"></output></label>
+    <input id={`valor-${produto}`} type="range" data-in="valor" min={min} max={max} step={step} value={valor} />
+  </div>
+
+  <div class="sim__field">
+    <label for={`prazo-${produto}`}>Em quanto tempo <output data-out="prazo"></output></label>
+    <input id={`prazo-${produto}`} type="range" data-in="prazo" min="6" max={maxPrazo} step="1" value={prazo} />
+  </div>
+
+  <details class="sim__advanced">
+    <summary>Ajustar taxa e encargos</summary>
+    <div class="sim__field">
+      <label for={`taxa-${produto}`}>Taxa de juro anual (TAN) <output data-out="taxa"></output></label>
+      <input id={`taxa-${produto}`} type="range" data-in="taxa" min="5" max="45" step="0.5" value={taxa} />
+    </div>
+    <div class="sim__field">
+      <label for={`enc-${produto}`}>Imposto de selo e comissões iniciais <output data-out="enc"></output></label>
+      <input id={`enc-${produto}`} type="range" data-in="enc" min="0" max="5" step="0.1" value="0.1" />
+    </div>
+  </details>
+
+  <div class="sim__result" aria-live="polite">
+    <p class="sim__label">Prestação mensal estimada</p>
+    <p class="sim__big" data-res="pmt">—</p>
+    <details class="sim__more">
+    <summary>Quanto estou a pagar</summary>
+    <dl class="sim__list">
+      <div>
+        <dt>Total a pagar</dt>
+        <dd data-res="total">—</dd>
+      </div>
+      <div>
+        <dt>Custo do crédito</dt>
+        <dd data-res="custo">—</dd>
+      </div>
+      <div>
+        <dt>TAEG estimada</dt>
+        <dd data-res="taeg">—</dd>
+      </div>
+    </dl>
+    </details>
+  </div>
+
+  <div class="sim__cta">
+    <a class="btn btn--green btn--block" data-cta href="#pedir">Pedir este crédito</a>
+  </div>
+  <p class="sim__note">
+    Simulação indicativa, calculada com prestações constantes. A taxa de partida é apenas um exemplo: use a taxa
+    e a TAEG da proposta do banco. A aprovação e as condições finais são decididas pelo banco.
+  </p>
+</div>
+
+<script>
+  import { payment, taeg, fmtKz, fmtPct, fmtPrazo } from '../lib/finance';
+
+  function init(root: HTMLElement) {
+    const get = (name: string) => root.querySelector<HTMLInputElement>(`[data-in="${name}"]`)!;
+    const out = (name: string) => root.querySelector<HTMLElement>(`[data-out="${name}"]`)!;
+    const res = (name: string) => root.querySelector<HTMLElement>(`[data-res="${name}"]`)!;
+    const cta = root.querySelector<HTMLAnchorElement>('[data-cta]')!;
+    const produto = root.dataset.produto ?? 'pessoal';
+
+    function update() {
+      const valor = Number(get('valor').value);
+      const prazo = Number(get('prazo').value);
+      const taxa = Number(get('taxa').value);
+      const enc = Number(get('enc').value);
+
+      const pmt = payment(valor, taxa, prazo);
+      const total = pmt * prazo;
+
+      out('valor').textContent = fmtKz(valor);
+      out('prazo').textContent = fmtPrazo(prazo);
+      out('taxa').textContent = fmtPct(taxa);
+      out('enc').textContent = fmtPct(enc);
+
+      res('pmt').innerHTML = `${Math.round(pmt).toLocaleString('pt-PT')} <small>Kz / mês</small>`;
+      res('total').textContent = fmtKz(total);
+      res('custo').textContent = fmtKz(total - valor + valor * (enc / 100));
+      res('taeg').textContent = fmtPct(taeg(valor, pmt, prazo, enc));
+
+      // Leva o valor e o prazo para o formulário que está no fim da página
+      cta.href = `?produto=${produto}&valor=${valor}&prazo=${prazo}#pedir`;
+    }
+
+    root.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-simulator]').forEach(init);
+</script>

@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LeadWizard from '../components/LeadWizard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { SEO } from '../data/seo';
+import { SITE } from '../data/site';
+
+const seo = SEO['/pedir-credito'];
+const faq = [
+  {
+    q: 'Quanto tempo demora a pedir aqui?',
+    a: 'Cerca de 3 minutos. São 5 passos curtos e começamos pelo seu contacto.',
+  },
+  {
+    q: 'Preciso de BI ou de dados bancários para pedir?',
+    a: 'Não neste formulário. Depois do primeiro contacto dizemos-lhe que documentos o banco pede.',
+  },
+  {
+    q: 'Enviar o pedido obriga-me a alguma coisa?',
+    a: 'Não. Enviar o pedido não é um contrato. Só assina se gostar da proposta do banco.',
+  },
+  {
+    q: 'O que fazem com as minhas respostas?',
+    a: 'Usamo-las para escolher o banco mais adequado e, com a sua autorização, falar consigo. Pode retirar a autorização quando quiser.',
+  },
+];
+---
+
+<Layout title={seo.title} description={seo.description} form={false} ctaHref="#pedir" related={{ categoria: 'mix' }}>
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Pedir crédito' }]} />
+      <h1>Pedir crédito online: <em>5 passos, 3 minutos</em></h1>
+      <p>{seo.description}</p>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="pedir" aria-labelledby="pedir-titulo">
+    <div class="container">
+      <h2 id="pedir-titulo" class="sr-only">Formulário de pedido</h2>
+      <LeadWizard produto="pessoal" />
+      <p class="small muted" style="text-align:center;margin:1.2rem auto 0">
+        Prefere escrever? <a href={`https://wa.me/${SITE.whatsapp}`} rel="noopener">Fale connosco no WhatsApp</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <div>
+        <h2>O que acontece <em>depois</em></h2>
+        <ol class="steps" style="grid-template-columns:1fr">
+          <li class="step"><h3>Falamos consigo</h3><p>Por telefone ou WhatsApp, para confirmar os dados e perceber o que precisa.</p></li>
+          <li class="step"><h3>Organizamos os documentos</h3><p>Dizemos-lhe exatamente o que o banco pede, para não perder tempo.</p></li>
+          <li class="step"><h3>Levamos o pedido ao banco</h3><p>O banco analisa e decide. Informamos o resultado assim que o recebermos.</p></li>
+        </ol>
+      </div>
+      <div>
+        <h2>Perguntas sobre o <em>pedido</em></h2>
+        <Faq items={faq} />
+      </div>
+    </div>
+  </section>
+</Layout>

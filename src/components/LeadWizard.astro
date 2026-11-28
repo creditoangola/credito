@@ -1,0 +1,234 @@
+---
+import { SITE, PROVINCES } from '../data/site';
+import { PRODUCTS } from '../data/products';
+
+interface Props {
+  produto?: 'pessoal' | 'automovel' | 'habitacao';
+}
+const { produto = 'pessoal' } = Astro.props;
+
+const config = {
+  pessoal: { taxa: PRODUCTS.pessoal.sim.taxa, valor: PRODUCTS.pessoal.sim.valor, prazo: PRODUCTS.pessoal.sim.prazo },
+  automovel: { taxa: PRODUCTS.automovel.sim.taxa, valor: PRODUCTS.automovel.sim.valor, prazo: PRODUCTS.automovel.sim.prazo },
+  habitacao: { taxa: PRODUCTS.habitacao.sim.taxa, valor: PRODUCTS.habitacao.sim.valor, prazo: PRODUCTS.habitacao.sim.prazo },
+};
+
+const finalidades = [
+  { p: 'pessoal', v: 'obras', t: 'Obras e decoração' },
+  { p: 'pessoal', v: 'estudos', t: 'Estudos e formação' },
+  { p: 'pessoal', v: 'saude', t: 'Saúde' },
+  { p: 'pessoal', v: 'compras', t: 'Compras e equipamentos' },
+  { p: 'pessoal', v: 'dividas', t: 'Juntar dívidas numa só' },
+  { p: 'pessoal', v: 'outro', t: 'Outro motivo' },
+  { p: 'automovel', v: 'carro-novo', t: 'Carro novo' },
+  { p: 'automovel', v: 'carro-usado', t: 'Carro usado' },
+  { p: 'automovel', v: 'trocar-carro', t: 'Trocar de carro' },
+  { p: 'habitacao', v: 'comprar-casa', t: 'Comprar casa' },
+  { p: 'habitacao', v: 'construir', t: 'Construir ou ampliar' },
+  { p: 'habitacao', v: 'terreno', t: 'Comprar terreno' },
+  { p: 'habitacao', v: 'transferir', t: 'Mudar o meu empréstimo de banco' },
+];
+---
+
+<div
+  class="wizard"
+  data-wizard
+  data-endpoint={SITE.leadEndpoint}
+  data-whatsapp={SITE.whatsapp}
+  data-produto={produto}
+  data-site={SITE.name}
+  data-config={JSON.stringify(config)}
+>
+  <div class="wizard__progress" data-progress>
+    <p data-progress-label aria-live="polite">Passo 1 de 5</p>
+    <div class="bar" role="progressbar" aria-label="Progresso do pedido" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1">
+      <div class="bar__fill" data-fill></div>
+    </div>
+  </div>
+
+  <p class="notice" data-resumed hidden>
+    <span>Retomámos o seu pedido onde ficou.</span>
+  </p>
+
+  <form novalidate data-form>
+    <!-- Passo 1: contacto primeiro -->
+    <fieldset class="wstep" data-step="1">
+      <legend>Comece pelo seu contacto</legend>
+      <p class="wstep__hint">Assim podemos ajudá-lo a terminar o pedido, mesmo que tenha de sair a meio.</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="w-nome">Nome completo</label>
+          <input id="w-nome" name="nome" type="text" autocomplete="name" />
+          <p class="field__error" data-error="nome" hidden></p>
+        </div>
+        <div class="field">
+          <label for="w-email">Email</label>
+          <input id="w-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nome@exemplo.com" />
+          <p class="field__error" data-error="email" hidden></p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="w-tel">Telemóvel (WhatsApp)</label>
+          <input id="w-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="923 000 000" />
+          <p class="field__error" data-error="telefone" hidden></p>
+        </div>
+        <div class="field">
+          <label for="w-prov">Província</label>
+          <select id="w-prov" name="provincia">
+            {PROVINCES.map((p) => <option value={p} selected={p === 'Luanda'}>{p}</option>)}
+          </select>
+        </div>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label>Não preencha este campo <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+      <label class="check">
+        <input type="checkbox" name="consentimento" />
+        <span>
+          Autorizo o {SITE.name} a contactar-me sobre este pedido, mesmo que eu não o conclua, e a partilhar os dados com
+          bancos para obter propostas. Posso retirar a autorização quando quiser. Leia a
+          <a href="/privacidade">política de privacidade</a>.
+        </span>
+      </label>
+      <p class="field__error" data-error="consentimento" hidden></p>
+    </fieldset>
+
+    <!-- Passo 2 -->
+    <fieldset class="wstep" data-step="2" hidden>
+      <legend>Que produto procura?</legend>
+      <p class="wstep__hint">Faltam 4 passos curtos. Responda em 3 minutos.</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="produto" value="pessoal" /><span>Pessoal</span></label>
+        <label class="choice"><input type="radio" name="produto" value="automovel" /><span>Automóvel</span></label>
+        <label class="choice"><input type="radio" name="produto" value="habitacao" /><span>Habitação</span></label>
+      </div>
+      <p class="field__error" data-error="produto" hidden></p>
+
+      <h3 class="wstep__sub">Para quê?</h3>
+      <div class="choices choices--2">
+        {
+          finalidades.map((f) => (
+            <label class="choice" data-for={f.p} hidden>
+              <input type="radio" name="finalidade" value={f.v} />
+              <span>{f.t}</span>
+            </label>
+          ))
+        }
+      </div>
+      <p class="field__error" data-error="finalidade" hidden></p>
+    </fieldset>
+
+    <!-- Passo 3 -->
+    <fieldset class="wstep" data-step="3" hidden>
+      <legend>Quanto precisa e em quanto tempo quer pagar?</legend>
+      <p class="wstep__hint">Valores em kwanzas. Pode mudar depois.</p>
+      <div class="field">
+        <label for="w-valor">Valor que precisa (Kz)</label>
+        <input id="w-valor" name="valor" type="number" inputmode="numeric" min="50000" step="10000" />
+        <div class="chips" data-chips></div>
+        <p class="field__error" data-error="valor" hidden></p>
+      </div>
+      <div class="field">
+        <label for="w-prazo">Prazo para pagar</label>
+        <select id="w-prazo" name="prazo"></select>
+        <p class="field__error" data-error="prazo" hidden></p>
+      </div>
+      <div class="estimate" data-estimate hidden>
+        <p>Prestação estimada</p>
+        <strong data-estimate-value></strong>
+        <small>Simulação com uma taxa de exemplo. A taxa real é a do banco.</small>
+      </div>
+    </fieldset>
+
+    <!-- Passo 4 -->
+    <fieldset class="wstep" data-step="4" hidden>
+      <legend>Quando precisa do dinheiro?</legend>
+      <p class="wstep__hint">Assim sabemos que prioridade dar ao seu pedido.</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="urgencia" value="o-mais-depressa" /><span>O mais depressa possível</span></label>
+        <label class="choice"><input type="radio" name="urgencia" value="este-mes" /><span>Ainda este mês</span></label>
+        <label class="choice"><input type="radio" name="urgencia" value="1-a-3-meses" /><span>Nos próximos 1 a 3 meses</span></label>
+        <label class="choice"><input type="radio" name="urgencia" value="so-a-ver" /><span>Só estou a ver as opções</span></label>
+      </div>
+      <p class="field__error" data-error="urgencia" hidden></p>
+    </fieldset>
+
+    <!-- Passo 5 -->
+    <fieldset class="wstep" data-step="5" hidden>
+      <legend>Fale-nos da sua situação</legend>
+      <p class="wstep__hint">O banco vai perguntar isto. Com as respostas certas, escolhemos o banco mais adequado.</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="w-situacao">Situação profissional</label>
+          <select id="w-situacao" name="situacao">
+            <option value="">Escolha…</option>
+            <option value="por-conta-de-outrem">Trabalhador por conta de outrem</option>
+            <option value="funcionario-publico">Funcionário público</option>
+            <option value="conta-propria">Conta própria ou empresário</option>
+            <option value="reformado">Reformado</option>
+            <option value="outra">Outra</option>
+          </select>
+          <p class="field__error" data-error="situacao" hidden></p>
+        </div>
+        <div class="field">
+          <label for="w-rendimento">Rendimento mensal líquido</label>
+          <select id="w-rendimento" name="rendimento">
+            <option value="">Escolha…</option>
+            <option value="ate-150000">Até 150 000 Kz</option>
+            <option value="150000-300000">150 000 a 300 000 Kz</option>
+            <option value="300000-600000">300 000 a 600 000 Kz</option>
+            <option value="600000-1000000">600 000 a 1 000 000 Kz</option>
+            <option value="mais-1000000">Mais de 1 000 000 Kz</option>
+            <option value="nao-dizer">Prefiro não dizer</option>
+          </select>
+          <p class="field__error" data-error="rendimento" hidden></p>
+        </div>
+      </div>
+
+      <h3 class="wstep__sub">Já tem prestações em curso?</h3>
+      <div class="choices choices--2">
+        <label class="choice"><input type="radio" name="creditos" value="nao" /><span>Não tenho</span></label>
+        <label class="choice"><input type="radio" name="creditos" value="sim" /><span>Sim, tenho</span></label>
+      </div>
+      <p class="field__error" data-error="creditos" hidden></p>
+      <div class="field" data-prestacao hidden>
+        <label for="w-prestacao">Quanto paga por mês nessas prestações (Kz)</label>
+        <input id="w-prestacao" name="prestacaoAtual" type="number" inputmode="numeric" min="0" step="5000" />
+        <p class="field__hint">O banco usa isto para calcular a sua taxa de esforço.</p>
+      </div>
+
+      <h3 class="wstep__sub">Já fez um pedido destes antes?</h3>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="historico" value="nunca" /><span>Nunca pedi</span></label>
+        <label class="choice"><input type="radio" name="historico" value="pedi-e-paguei" /><span>Já pedi e paguei como combinado</span></label>
+        <label class="choice"><input type="radio" name="historico" value="pedi-recusado" /><span>Já pedi e fui recusado</span></label>
+      </div>
+      <p class="field__error" data-error="historico" hidden></p>
+    </fieldset>
+
+    <div class="wizard__nav">
+      <button class="btn btn--ghost" type="button" data-back hidden>Voltar</button>
+      <button class="btn btn--green" type="button" data-next>Continuar</button>
+    </div>
+    <p class="privacy-note">
+      Guardamos as suas respostas a cada passo. Se não concluir, podemos contactá-lo para o ajudar. Enviar o pedido não é um contrato.
+    </p>
+  </form>
+
+  <div class="success" data-success hidden>
+    <h2 data-success-title>Recebemos o seu pedido</h2>
+    <p data-success-text></p>
+    <ul>
+      <li>Falamos consigo por telefone ou WhatsApp.</li>
+      <li>Dizemos-lhe que documentos juntar.</li>
+      <li>Levamos o pedido ao banco e informamos o resultado.</li>
+    </ul>
+    <a class="btn btn--green" data-wa href="#" target="_blank" rel="noopener">Continuar no WhatsApp</a>
+  </div>
+</div>
+
+<script>
+  import { initAllWizards } from '../scripts/wizard';
+  initAllWizards();
+</script>

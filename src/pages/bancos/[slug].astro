@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Simulator from '../../components/Simulator.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Icon from '../../components/Icon.astro';
+import { BANKS } from '../../data/banks';
+import { SITE } from '../../data/site';
+
+export function getStaticPaths() {
+  return BANKS.filter((b) => b.published).map((b) => ({ params: { slug: b.slug }, props: { bank: b } }));
+}
+
+const { bank } = Astro.props;
+const title = `Crédito pessoal ${bank.name.split('(').pop()?.replace(')', '') ?? bank.name}: documentos e requisitos`;
+const description = `Documentos, requisitos e simulação do crédito pessoal ${bank.name}, com ligação à fonte oficial e data de atualização.`;
+const url = `${SITE.url}/bancos/${bank.slug}`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': url,
+  url,
+  name: title,
+  description,
+  inLanguage: 'pt-AO',
+  isPartOf: { '@id': `${SITE.url}/#site` },
+};
+---
+
+<Layout title={title} description={description} schema={schema} form="pessoal" related={{ categoria: 'pessoal' }}>
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Bancos', href: '/bancos' }, { name: bank.name }]} />
+      <h1>Crédito pessoal <em>{bank.name}</em></h1>
+      <p>
+        Documentos e requisitos publicados pelo próprio banco{bank.taxa ? `, com TAN de ${bank.taxa}%` : ''}. Atualizado a {SITE.dataUpdated}.
+      </p>
+      <a class="btn btn--green" href="#pedir">Pedir crédito pessoal</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <div>
+        <h2>Documentos que o banco pede</h2>
+        <ul class="checklist">
+          {bank.docs?.map((d) => <li><span class="tick"><Icon name="check" /></span><span>{d}</span></li>)}
+        </ul>
+        <h2>Requisitos para pedir crédito</h2>
+        <ul class="checklist">
+          {bank.requisitos?.map((r) => <li><span class="tick"><Icon name="check" /></span><span>{r}</span></li>)}
+        </ul>
+        {bank.prazoMax ? <p><strong>Prazo máximo:</strong> {bank.prazoMax}.</p> : null}
+        {bank.nota ? <div class="notice"><p>{bank.nota}</p></div> : null}
+        <div class="sources">
+          <h4>Fontes oficiais</h4>
+          <ul>
+            {bank.fontes?.map((f) => <li><a href={f.url} rel="noopener nofollow">{f.label}</a></li>)}
+          </ul>
+        </div>
+      </div>
+      <div>
+        {
+          bank.taxa ? (
+            <Simulator produto="pessoal" taxa={bank.taxa} title={`Simular com a taxa do ${bank.name.split('(')[0].trim()}`} />
+          ) : (
+            <div class="notice">
+              <p>
+                Este banco não publica a taxa na fonte que usamos. Use o <a href="/simulador">simulador</a> com uma taxa de exemplo e peça-nos a taxa atual do banco.
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>

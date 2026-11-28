@@ -1,0 +1,16 @@
+FOTOS REAIS (recomendado: pessoas angolanas, cenas do dia a dia, expressões alegres)
+
+Guarde aqui as fotos com estes nomes (jpg, webp ou png). Se o ficheiro existir, o site usa-o
+automaticamente; se não existir, mostra uma ilustração provisória.
+
+  hero.jpg              Foto grande da home, vertical ou quadrada (min. 1000x1200 px)
+  credito-pessoal.jpg   Cartão da home, quadrada (min. 800x800 px)
+  credito-automovel.jpg Cartão da home, quadrada
+  credito-habitacao.jpg Cartão da home, quadrada
+  pedido-online.jpg     Pessoa a usar o telemóvel (faixa verde-escura)
+  ajuda.jpg             Foto da secção de ajuda, 4:3
+
+DIREITOS: use só fotos que sejam suas, contratadas num shooting em Angola, ou com licença comercial
+(banco de imagens). NÃO use fotos retiradas de sites de bancos ou concorrentes (ex.: Cetelem).
+Peça sempre autorização escrita (autorização de imagem) às pessoas fotografadas.
+Comprima as imagens (WebP, até ~200 KB) para o site carregar depressa em redes móveis.

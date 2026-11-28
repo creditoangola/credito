@@ -1,0 +1,218 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Simulator from '../components/Simulator.astro';
+import Photo from '../components/Photo.astro';
+import Faq from '../components/Faq.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../data/site';
+import { SEO } from '../data/seo';
+import { PRODUCTS } from '../data/products';
+import { payment, fmtNum, fmtKz } from '../lib/finance';
+
+const seo = SEO['/'];
+const pessoal = PRODUCTS.pessoal;
+const pmt = payment(pessoal.sim.valor, pessoal.sim.taxa, pessoal.sim.prazo);
+
+const faq = [
+  {
+    q: 'O Crédito.ao é um banco?',
+    a: 'Não. Somos uma plataforma para simular, comparar e enviar o seu pedido de crédito. Quem concede o empréstimo, decide a aprovação e define as condições finais é sempre o banco.',
+  },
+  {
+    q: 'Quanto tempo demora a aprovação?',
+    a: 'Depende do banco e de o pedido estar completo. Um pedido feito com todos os documentos é analisado mais depressa. Quando enviar o pedido, dizemos-lhe o prazo previsto do banco.',
+  },
+  {
+    q: 'Quando é que o dinheiro entra na conta?',
+    a: 'Depois de aprovado e de assinar o contrato, o banco credita o valor na conta à ordem indicada no contrato. Confirmamos consigo o prazo previsto.',
+  },
+  {
+    q: 'Que documentos preciso para pedir crédito?',
+    a: 'Normalmente o bilhete de identidade, os últimos recibos de salário, a declaração da entidade patronal e o comprovativo de morada. Cada banco confirma a sua lista e nós dizemos-lhe o que falta.',
+  },
+  {
+    q: 'Como sei quanto vou pagar no total?',
+    a: 'Use o simulador: mostra a prestação, o total a pagar e a TAEG estimada. A proposta do banco confirma os números finais antes de assinar.',
+  },
+  {
+    q: 'Quanto custa pedir crédito pelo Crédito.ao?',
+    a: 'Simular e enviar o pedido não custa nada. Se houver algum custo pelo nosso serviço, é-lhe dito por escrito antes de avançar.',
+  },
+  {
+    q: 'Vocês garantem a aprovação?',
+    a: 'Não. A aprovação depende da análise do banco ao seu rendimento e à sua situação. O nosso trabalho é organizar o pedido e mostrar-lhe as opções.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': SITE.url,
+  url: SITE.url,
+  name: seo.title,
+  description: seo.description,
+  inLanguage: 'pt-AO',
+  isPartOf: { '@id': `${SITE.url}/#site` },
+  about: ['crédito pessoal', 'crédito automóvel', 'crédito habitação'],
+};
+---
+
+<Layout title={seo.title} description={seo.description} schema={schema} form="pessoal" related={{ categoria: 'mix' }}>
+  <!-- Promessa clara: o herói é quem pede o crédito -->
+  <section class="hero">
+    <div class="container hero__head">
+      <h1 class="hero__title">Crédito Online em Angola: Simulador Grátis, <em>saiba quanto vai pagar antes de pedir</em></h1>
+      <p class="hero__lead">
+        {seo.description}
+      </p>
+    </div>
+    <div class="container hero__grid">
+      <div class="hero__media">
+        <Photo
+          name="hero-pessoal"
+          alt="Mulher angolana a sorrir enquanto faz a simulação no telemóvel, em casa"
+          brief="Pessoa angolana a sorrir com o telemóvel, em casa. Luz natural."
+          ratio="1 / 1"
+          loading="eager"
+        />
+        <div class="btn-row">
+          <a class="btn btn--green" href="#pedir">Pedir crédito</a>
+          <a class="btn btn--ghost" href={`https://wa.me/${SITE.whatsapp}`} rel="noopener">Falar no WhatsApp</a>
+        </div>
+      </div>
+      <div id="simular">
+        <Simulator produto="pessoal" title="Simule o crédito online" {...pessoal.sim} />
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits" aria-label="Vantagens">
+    <div class="container">
+      <ul>
+        <li><span class="tick"><Icon name="check" /></span>Simule o crédito online</li>
+        <li><span class="tick"><Icon name="check" /></span>Sem sair de casa</li>
+        <li><span class="tick"><Icon name="check" /></span>Sem filas de espera</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Os 3 créditos -->
+  <section class="section section--tint" aria-labelledby="h-projetos">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-projetos">A pensar em <em>projetos novos?</em></h2>
+        <p>Escolha o produto certo para o que tem em mãos. Cada página responde ao que quer saber: prestação, documentos e prazos.</p>
+      </div>
+      <div class="pcards">
+        <article class="pcard">
+          <Photo name="projetos" alt="Família a pintar uma parede de casa, com tinta nas mãos" brief="Família a pintar ou arrumar a casa, com tinta nas mãos, ambiente divertido." ratio="1 / 1" />
+          <h3>Crédito pessoal</h3>
+          <p>Obras, estudos, saúde ou um imprevisto. Exemplo: {fmtKz(pessoal.sim.valor)} a {pessoal.sim.prazo} meses dão cerca de {fmtNum(pmt)} Kz por mês.</p>
+          <a class="btn btn--ghost" href="/credito-pessoal">Simular crédito pessoal</a>
+        </article>
+        <article class="pcard">
+          <Photo name="automovel" alt="Casal a rir e a brincar na garagem de casa" brief="Pessoa angolana a abraçar ou lavar o carro com um sorriso. Cena divertida." ratio="1 / 1" />
+          <h3>Crédito automóvel</h3>
+          <p>Compre um carro novo ou dê uma segunda vida a um usado, a saber a prestação antes de ir ao stand.</p>
+          <a class="btn btn--ghost" href="/credito-automovel">Simular crédito automóvel</a>
+        </article>
+        <article class="pcard">
+          <Photo name="habitacao" alt="Família a rir enquanto arruma caixas de mudança na casa nova" brief="Família a entrar numa casa nova com caixas, a brincar." ratio="1 / 1" />
+          <h3>Crédito habitação</h3>
+          <p>Comprar casa, construir ou mudar o empréstimo que já tem, com os documentos do imóvel explicados.</p>
+          <a class="btn btn--ghost" href="/credito-habitacao">Simular crédito habitação</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plano em 3 passos -->
+  <section class="section" aria-labelledby="h-como">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-como">Pedir crédito em <em>3 passos</em></h2>
+        <p>Sem filas e sem papéis a mais. Cada passo é simples e pode parar quando quiser.</p>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <h3>Simule</h3>
+          <p>Escolha o valor e o prazo. Veja a prestação, o total a pagar e a TAEG estimada.</p>
+        </li>
+        <li class="step">
+          <h3>Responda a 5 perguntas</h3>
+          <p>Diga quanto precisa, quando precisa e a sua situação. Começamos pelo seu contacto, para o ajudarmos mesmo que não termine.</p>
+        </li>
+        <li class="step">
+          <h3>Nós tratamos do pedido</h3>
+          <p>Dizemos-lhe os documentos, enviamos o pedido ao banco e acompanhamos por WhatsApp. A decisão é do banco.</p>
+        </li>
+      </ol>
+      <div class="btn-row" style="margin-top:1.8rem">
+        <a class="btn btn--green" href="#pedir">Começar o meu pedido</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Oferta -->
+  <section class="section section--tint" aria-labelledby="h-oferta">
+    <div class="container">
+      <div class="offer on-dark">
+        <div>
+          <h2 id="h-oferta">Tudo o que precisa para pedir, <em>sem complicações</em></h2>
+          <ul class="ticks">
+            <li><span class="tick"><Icon name="check" /></span>Simulação com prestação, total a pagar e TAEG estimada</li>
+            <li><span class="tick"><Icon name="check" /></span>Lista de documentos à medida do seu caso</li>
+            <li><span class="tick"><Icon name="check" /></span>Pedido organizado e enviado ao banco por nós</li>
+            <li><span class="tick"><Icon name="check" /></span>Acompanhamento por WhatsApp até haver resposta</li>
+            <li><span class="tick"><Icon name="check" /></span>Sem compromisso: só assina se gostar da proposta</li>
+          </ul>
+        </div>
+        <div class="offer__price">
+          <p>Para simular e enviar o pedido</p>
+          <strong>0 Kz</strong>
+          <p>Se houver algum custo pelo nosso serviço, dizemos-lho por escrito antes de avançar.</p>
+          <a class="btn btn--green btn--block" href="#pedir">Pedir agora</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Faixa online -->
+  <section class="section" aria-labelledby="h-online">
+    <div class="container">
+      <div class="help">
+        <Photo name="pedido-online" alt="Casal a rir e a brincar em casa, feliz com o pedido aprovado" brief="Casal angolano a rir em casa, a celebrar." ratio="1 / 1" />
+        <div>
+          <h2 id="h-online">Peça <em>100% online</em></h2>
+          <p>Do telemóvel, em qualquer província. Fale connosco no WhatsApp e acompanhe o seu pedido sem ir a um balcão para começar.</p>
+          <div class="btn-row">
+            <a class="btn btn--green" href="#pedir">Pedir online</a>
+            <a class="btn btn--ghost" href="/simulador">Abrir o simulador</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" aria-labelledby="h-faq">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-faq">Perguntas <em>frequentes</em></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="help">
+        <div>
+          <h2>Tem <em>dúvidas?</em></h2>
+          <p>Escreva-nos no WhatsApp. Respondemos sobre documentos, prazos e custos, sem compromisso.</p>
+          <a class="btn btn--dark" href={`https://wa.me/${SITE.whatsapp}`} rel="noopener">Falar no WhatsApp</a>
+        </div>
+        <Photo name="ajuda" alt="Palanca-negra verde, mascote do Crédito.ao, com o polegar para cima" brief="Mascote ou pessoa simpática com o polegar para cima." ratio="1 / 1" />
+      </div>
+    </div>
+  </section>
+</Layout>

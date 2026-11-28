@@ -1,0 +1,55 @@
+---
+import { SITE } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="footer__brand">credito<span>.ao</span></div>
+        <p>Simule, compare e peça em Angola. Valores em kwanzas (Kz).</p>
+      </div>
+      <div>
+        <h5>Produtos</h5>
+        <ul>
+          <li><a href="/credito-pessoal">Crédito Pessoal Online</a></li>
+          <li><a href="/credito-automovel">Crédito Automóvel Online</a></li>
+          <li><a href="/credito-habitacao">Crédito Habitação Online</a></li>
+          <li><a href="/pedir-credito">Pedir crédito Online</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Informação</h5>
+        <ul>
+          <li><a href="/simulador">Simulador</a></li>
+          <li><a href="/bancos">Bancos</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/sobre-nos">Sobre nós</a></li>
+          <li><a href="/contactos">Contactos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="/aviso-legal">Aviso legal</a></li>
+          <li><a href="/privacidade">Privacidade</a></li>
+          <li><a href="/termos">Termos de utilização</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <p>
+        O {SITE.name} é uma plataforma de informação e comparação. Não concede empréstimos: a decisão de
+        aprovação, as condições e a TAEG finais são sempre do banco. As simulações são indicativas e não constituem
+        proposta contratual.
+      </p>
+      {
+        SITE.bnaRegistration ? (
+          <p>Intermediário registado no Banco Nacional de Angola com o n.º {SITE.bnaRegistration}.</p>
+        ) : null
+      }
+      <p>© {year} {SITE.name}. Dados dos bancos atualizados a {SITE.dataUpdated}.</p>
+    </div>
+  </div>
+</footer>

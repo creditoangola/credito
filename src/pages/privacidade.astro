@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../data/site';
+import { SEO } from '../data/seo';
+const seo = SEO['/privacidade'];
+---
+
+<!-- RASCUNHO: rever com advogado (Lei da Proteção de Dados Pessoais e Agência de Proteção de Dados) antes de publicar. -->
+<Layout form={false} title={seo.title} description={seo.description}>
+  <section class="page-head">
+    <div class="container">
+      <h1>Política de privacidade</h1>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="prose prose--center">
+        <h2>Que dados recolhemos</h2>
+        <p>
+          O pedido de crédito tem 5 passos. No passo 1 pedimos o nome, o email, o telemóvel e a província. Nos passos
+          seguintes recolhemos o tipo de crédito, a finalidade, o valor, o prazo, quando precisa do dinheiro, a situação
+          profissional, a faixa de rendimento e se já tem créditos. Não pedimos BI, NIF nem dados bancários.
+        </p>
+        <h2>Se não terminar o pedido</h2>
+        <p>
+          Guardamos os dados de cada passo que já preencheu, mesmo que não chegue ao fim. Ao avançar do passo 1, autoriza-nos a
+          contactá-lo sobre o pedido, mesmo que o não conclua, para o ajudarmos a terminá-lo. Pode retirar a autorização e pedir
+          a eliminação dos dados a qualquer momento, em info@credito.ao.
+        </p>
+        <h2>Para que usamos os dados</h2>
+        <ul>
+          <li>Contactá-lo sobre o seu pedido.</li>
+          <li>Preparar o pedido e, com a sua autorização, partilhá-lo com bancos para obter propostas.</li>
+        </ul>
+        <h2>Com quem partilhamos</h2>
+        <p>
+          Apenas com os bancos a quem o pedido for enviado e com prestadores que nos ajudam a operar o serviço, sempre
+          com a sua autorização e para esta finalidade.
+        </p>
+        <h2>Durante quanto tempo</h2>
+        <p>Guardamos os dados pelo tempo necessário ao pedido e às obrigações legais. Depois eliminamo-los.</p>
+        <h2>Os seus direitos</h2>
+        <p>
+          Pode pedir acesso, correção ou eliminação dos seus dados e retirar a autorização a qualquer momento, escrevendo
+          para <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

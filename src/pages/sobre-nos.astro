@@ -1,0 +1,143 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Faq from '../components/Faq.astro';
+import Icon from '../components/Icon.astro';
+import { SEO } from '../data/seo';
+import { SITE } from '../data/site';
+
+const seo = SEO['/sobre-nos'];
+const url = `${SITE.url}/sobre-nos`;
+
+const faq = [
+  {
+    q: 'O Crédito.ao é um banco?',
+    a: 'Não. Somos uma plataforma que explica, simula e organiza o pedido. A análise, a aprovação e as condições finais são sempre do banco.',
+  },
+  {
+    q: 'Quanto custa usar o Crédito.ao?',
+    a: 'Simular e enviar o pedido custa 0 Kz. Se alguma vez houver um custo pelo nosso serviço, dizemos-lho por escrito antes de avançar.',
+  },
+  {
+    q: 'Vocês recebem dinheiro dos clientes?',
+    a: 'Não. Nunca pedimos dinheiro para libertar um pedido, e não recebemos nem entregamos valores do contrato com o banco.',
+  },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': url,
+    url,
+    name: seo.title,
+    description: seo.description,
+    inLanguage: 'pt-AO',
+    isPartOf: { '@id': `${SITE.url}/#site` },
+    about: { '@id': `${SITE.url}/#org` },
+  },
+];
+---
+
+<Layout title={seo.title} description={seo.description} schema={schema} form="pessoal" related={{ categoria: 'mix' }}>
+  <section class="page-head">
+    <div class="container">
+      <h1>Sobre nós: <em>o crédito online explicado com clareza</em></h1>
+      <p>{seo.description}</p>
+      <div class="btn-row btn-row--center" style="margin-top:1.4rem">
+        <a class="btn btn--green" href="#pedir">Pedir crédito online</a>
+        <a class="btn btn--ghost" href="/contactos">Falar connosco</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-missao">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-missao">A nossa <em>missão</em></h2>
+        <p>
+          Pedir dinheiro ao banco não devia ser um labirinto. Muita gente volta ao balcão por falta de um papel, ou só descobre o valor da prestação no fim. Criámos o {SITE.name} para que saiba o que vai pagar, que documentos levar e quanto tempo esperar antes de começar.
+        </p>
+      </div>
+      <div class="answers">
+        <article class="answer">
+          <h3>Simulamos</h3>
+          <p>Prestação, total a pagar e TAEG estimada, em kwanzas, antes de pedir o que quer que seja.</p>
+        </article>
+        <article class="answer">
+          <h3>Explicamos</h3>
+          <p>Os documentos que o banco pede, as etapas e o que faz o pedido avançar mais depressa.</p>
+        </article>
+        <article class="answer">
+          <h3>Organizamos</h3>
+          <p>Reunimos o seu pedido e levamo-lo ao banco mais adequado ao seu caso.</p>
+        </article>
+        <article class="answer">
+          <h3>Acompanhamos</h3>
+          <p>Falamos consigo por telefone ou WhatsApp até haver resposta do banco.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" aria-labelledby="h-limites">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-limites">O que fazemos e o que <em>não fazemos</em></h2>
+        <p>Dizemos com franqueza onde acaba o nosso trabalho, para que não haja surpresas.</p>
+      </div>
+      <div class="split split--even">
+        <div class="card">
+          <h3>Os nossos compromissos</h3>
+          <ul class="checklist">
+            <li><span class="tick"><Icon name="check" /></span><span>Simular e enviar o pedido custa 0 Kz.</span></li>
+            <li><span class="tick"><Icon name="check" /></span><span>Dizemos-lhe o prazo previsto do banco, sem prometer o que não controlamos.</span></li>
+            <li><span class="tick"><Icon name="check" /></span><span>Só publicamos dados dos bancos com fonte oficial.</span></li>
+            <li><span class="tick"><Icon name="check" /></span><span>Só avança se quiser: só assina se gostar da proposta.</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>O que não fazemos</h3>
+          <ul class="checklist">
+            <li><span class="tick tick--no" aria-hidden="true">×</span><span>Não somos um banco e não concedemos empréstimos.</span></li>
+            <li><span class="tick tick--no" aria-hidden="true">×</span><span>Não garantimos a aprovação de nenhum pedido.</span></li>
+            <li><span class="tick tick--no" aria-hidden="true">×</span><span>Não pedimos dinheiro adiantado nem recebemos valores do contrato.</span></li>
+            <li><span class="tick tick--no" aria-hidden="true">×</span><span>Não vendemos outros produtos como condição para o pedido avançar.</span></li>
+          </ul>
+        </div>
+      </div>
+      {
+        SITE.bnaRegistration ? (
+          <p class="small muted" style="text-align:center;margin-top:1.4rem">
+            Intermediário registado no Banco Nacional de Angola com o n.º {SITE.bnaRegistration}.
+          </p>
+        ) : null
+      }
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-como">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-como">Como <em>trabalhamos</em></h2>
+        <p>Três passos simples, do primeiro clique à resposta do banco.</p>
+      </div>
+      <ol class="steps">
+        <li class="step"><h3>Simule</h3><p>Escolha o valor e o prazo e veja a prestação, o total a pagar e a TAEG estimada.</p></li>
+        <li class="step"><h3>Responda a 5 perguntas</h3><p>Começamos pelo seu contacto e depois perguntamos quanto, quando e para quê.</p></li>
+        <li class="step"><h3>Nós tratamos do pedido</h3><p>Dizemos-lhe os documentos, enviamos o pedido ao banco e acompanhamos por WhatsApp.</p></li>
+      </ol>
+      <div class="btn-row" style="margin-top:1.8rem">
+        <a class="btn btn--green" href="#pedir">Começar o meu pedido</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" aria-labelledby="h-faq">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-faq">Perguntas sobre o <em>{SITE.name}</em></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+</Layout>

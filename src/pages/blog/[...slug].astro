@@ -1,0 +1,92 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE } from '../../data/site';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((hd) => hd.depth === 2);
+const words = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 200));
+const iso = entry.data.date.toISOString();
+const dataTxt = entry.data.date.toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+const url = `${SITE.url}/blog/${entry.id}`;
+const cat = entry.data.categoria;
+const produtoLink: Record<string, { href: string; nome: string }> = {
+  pessoal: { href: '/credito-pessoal', nome: 'crédito pessoal' },
+  automovel: { href: '/credito-automovel', nome: 'crédito automóvel' },
+  habitacao: { href: '/credito-habitacao', nome: 'crédito habitação' },
+  geral: { href: '/simulador', nome: 'crédito' },
+};
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  '@id': url,
+  mainEntityOfPage: url,
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: iso,
+  dateModified: iso,
+  inLanguage: 'pt-AO',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  publisher: { '@id': `${SITE.url}/#org` },
+  image: `${SITE.url}/og.png`,
+};
+---
+
+<Layout
+  title={entry.data.title}
+  description={entry.data.description}
+  schema={schema}
+  form={cat === 'geral' ? 'pessoal' : cat}
+  related={{ categoria: cat, exclude: entry.id }}
+  ogType="article"
+>
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Blog', href: '/blog' }, { name: entry.data.title }]} />
+      <h1>{entry.data.title}</h1>
+      <p class="meta">{dataTxt} · {minutes} min de leitura</p>
+      <p>{entry.data.description}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container article">
+      <article class="prose">
+        <Content />
+        {
+          entry.data.faq ? (
+            <div style="margin-top:2.5rem">
+              <h2>Perguntas frequentes</h2>
+              <Faq items={entry.data.faq} />
+            </div>
+          ) : null
+        }
+        <div class="notice">
+          <p>
+            Informação geral, sem valor de aconselhamento financeiro ou jurídico. Confirme as condições com o banco antes de decidir.
+          </p>
+        </div>
+      </article>
+      <aside class="toc" aria-label="Neste artigo">
+        <h2>Neste artigo</h2>
+        <ol>
+          {toc.map((hd) => <li><a href={`#${hd.slug}`}>{hd.text}</a></li>)}
+        </ol>
+        <div class="toc__cta">
+          <a class="btn btn--green btn--block" href="#pedir">Pedir {produtoLink[cat].nome}</a>
+          <p class="small" style="margin-top:0.7rem"><a href={produtoLink[cat].href}>Ver simulador de {produtoLink[cat].nome}</a></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,235 @@
+---
+import { SITE, PROVINCES } from '../data/site';
+---
+
+<div data-lead data-endpoint={SITE.leadEndpoint} data-whatsapp={SITE.whatsapp}>
+  <form class="form" novalidate data-form>
+    <div class="field">
+      <label for="nome">Nome completo</label>
+      <input id="nome" name="nome" type="text" autocomplete="name" required />
+      <p class="field__error" data-error="nome" hidden></p>
+    </div>
+
+    <div class="field">
+      <label for="telefone">Telemóvel (WhatsApp)</label>
+      <input id="telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="923 000 000" required />
+      <p class="field__hint">9 dígitos, começa por 9. Usamo-lo para falar consigo sobre o pedido.</p>
+      <p class="field__error" data-error="telefone" hidden></p>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="produto">Tipo de crédito</label>
+        <select id="produto" name="produto" required>
+          <option value="pessoal">Crédito pessoal</option>
+          <option value="automovel">Crédito automóvel</option>
+          <option value="habitacao">Crédito habitação</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="provincia">Província</label>
+        <select id="provincia" name="provincia" required>
+          {PROVINCES.map((p) => <option value={p} selected={p === 'Luanda'}>{p}</option>)}
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="valor">Valor pretendido (Kz)</label>
+        <input id="valor" name="valor" type="number" inputmode="numeric" min="50000" step="10000" value="5000000" required />
+        <p class="field__error" data-error="valor" hidden></p>
+      </div>
+      <div class="field">
+        <label for="prazo">Prazo (meses)</label>
+        <input id="prazo" name="prazo" type="number" inputmode="numeric" min="6" max="360" step="1" value="36" required />
+        <p class="field__error" data-error="prazo" hidden></p>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="situacao">Situação profissional</label>
+        <select id="situacao" name="situacao" required>
+          <option value="por-conta-de-outrem">Trabalhador por conta de outrem</option>
+          <option value="funcionario-publico">Funcionário público</option>
+          <option value="conta-propria">Conta própria / empresário</option>
+          <option value="reformado">Reformado</option>
+          <option value="outra">Outra</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="rendimento">Rendimento mensal líquido (Kz)</label>
+        <input id="rendimento" name="rendimento" type="number" inputmode="numeric" min="0" step="10000" placeholder="Opcional" />
+        <p class="field__hint">Opcional. Ajuda a escolher os bancos certos.</p>
+      </div>
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label>Não preencha este campo <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="consentimento" required />
+      <span>
+        Autorizo o {SITE.name} a contactar-me e a partilhar estes dados com bancos para obter propostas de crédito.
+        Posso retirar a autorização quando quiser. Leia a <a href="/privacidade">política de privacidade</a>.
+      </span>
+    </label>
+    <p class="field__error" data-error="consentimento" hidden></p>
+
+    <button class="btn btn--green btn--block" type="submit" data-submit>Enviar pedido</button>
+    <p class="field__hint">
+      Não pedimos BI, NIF nem dados bancários neste formulário. Enviar o pedido não é um contrato de crédito.
+    </p>
+    <p class="field__error" data-error="geral" hidden></p>
+  </form>
+
+  <div class="success" data-success hidden tabindex="-1">
+    <h2 data-success-title>Pedido preparado</h2>
+    <p data-success-text></p>
+    <a class="btn btn--green" data-wa href="#" target="_blank" rel="noopener">Continuar no WhatsApp</a>
+  </div>
+</div>
+
+<script>
+  const PRODUTOS: Record<string, string> = {
+    pessoal: 'Crédito pessoal',
+    automovel: 'Crédito automóvel',
+    habitacao: 'Crédito habitação',
+  };
+
+  const root = document.querySelector<HTMLElement>('[data-lead]');
+  if (root) {
+    const form = root.querySelector<HTMLFormElement>('[data-form]')!;
+    const success = root.querySelector<HTMLElement>('[data-success]')!;
+    const endpoint = root.dataset.endpoint || '';
+    const whatsapp = root.dataset.whatsapp || '';
+
+    // Pré-preencher a partir do simulador (?produto=&valor=&prazo=)
+    const params = new URLSearchParams(location.search);
+    const setIf = (name: string, value: string | null) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
+      if (el && value) el.value = value;
+    };
+    const produto = params.get('produto');
+    if (produto && PRODUTOS[produto]) setIf('produto', produto);
+    setIf('valor', params.get('valor'));
+    setIf('prazo', params.get('prazo'));
+
+    const showError = (name: string, msg: string | null) => {
+      const p = form.querySelector<HTMLElement>(`[data-error="${name}"]`);
+      if (p) {
+        p.textContent = msg ?? '';
+        p.hidden = !msg;
+      }
+      const input = form.elements.namedItem(name) as HTMLElement | null;
+      if (input && 'setAttribute' in input) {
+        if (msg) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+      }
+    };
+
+    const normalizePhone = (raw: string) => raw.replace(/[\s\-().]/g, '').replace(/^(\+?244)/, '');
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const data = new FormData(form);
+      if (data.get('website')) return; // anti-spam
+
+      let ok = true;
+      const nome = String(data.get('nome') || '').trim();
+      const telefone = normalizePhone(String(data.get('telefone') || ''));
+      const valor = Number(data.get('valor'));
+      const prazo = Number(data.get('prazo'));
+
+      showError('nome', nome.length < 3 ? 'Indique o seu nome completo.' : null);
+      if (nome.length < 3) ok = false;
+
+      const phoneOk = /^9\d{8}$/.test(telefone);
+      showError('telefone', phoneOk ? null : 'Indique um telemóvel com 9 dígitos, a começar por 9.');
+      if (!phoneOk) ok = false;
+
+      const valorOk = Number.isFinite(valor) && valor >= 50000;
+      showError('valor', valorOk ? null : 'O valor mínimo é 50 000 Kz.');
+      if (!valorOk) ok = false;
+
+      const prazoOk = Number.isInteger(prazo) && prazo >= 6 && prazo <= 360;
+      showError('prazo', prazoOk ? null : 'Indique um prazo entre 6 e 360 meses.');
+      if (!prazoOk) ok = false;
+
+      const consent = data.get('consentimento') === 'on';
+      showError('consentimento', consent ? null : 'Precisamos da sua autorização para tratar o pedido.');
+      if (!consent) ok = false;
+
+      if (!ok) {
+        (form.querySelector('[aria-invalid="true"]') as HTMLElement | null)?.focus();
+        return;
+      }
+
+      const payload = {
+        nome,
+        telefone: '+244' + telefone,
+        produto: String(data.get('produto')),
+        provincia: String(data.get('provincia')),
+        valor,
+        prazo,
+        situacao: String(data.get('situacao')),
+        rendimento: data.get('rendimento') ? Number(data.get('rendimento')) : null,
+        consentimento: true,
+        origem: location.href,
+        data: new Date().toISOString(),
+      };
+
+      const msg =
+        `Olá! Quero um pedido de ${PRODUTOS[payload.produto] ?? 'crédito'}.\n` +
+        `Nome: ${nome}\nValor: ${valor.toLocaleString('pt-PT')} Kz\nPrazo: ${prazo} meses\nProvíncia: ${payload.provincia}`;
+      const waLink = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+
+      const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+      submit.disabled = true;
+      submit.textContent = 'A enviar…';
+      showError('geral', null);
+
+      let saved = false;
+      if (endpoint) {
+        try {
+          const r = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          saved = r.ok;
+        } catch {
+          saved = false;
+        }
+        if (!saved) {
+          showError('geral', 'Não conseguimos enviar o pedido. Tente outra vez ou fale connosco no WhatsApp.');
+        }
+      }
+
+      const title = success.querySelector<HTMLElement>('[data-success-title]')!;
+      const text = success.querySelector<HTMLElement>('[data-success-text]')!;
+      const wa = success.querySelector<HTMLAnchorElement>('[data-wa]')!;
+      wa.href = waLink;
+
+      if (saved) {
+        title.textContent = 'Recebemos o seu pedido';
+        text.textContent =
+          'Vamos contactá-lo por telefone ou WhatsApp para confirmar os dados e explicar os próximos passos. Se preferir, pode falar já connosco no WhatsApp.';
+      } else if (!endpoint) {
+        title.textContent = 'Falta um passo: envie a mensagem no WhatsApp';
+        text.textContent =
+          'Preparámos a mensagem com os dados do seu pedido. Toque no botão e envie-a no WhatsApp para o pedido nos chegar.';
+      } else {
+        submit.disabled = false;
+        submit.textContent = 'Enviar pedido';
+        return;
+      }
+
+      form.hidden = true;
+      success.hidden = false;
+      success.focus();
+    });
+  }
+</script>

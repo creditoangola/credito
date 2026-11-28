@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../data/site';
+import { SEO } from '../data/seo';
+const seo = SEO['/aviso-legal'];
+---
+
+<!-- RASCUNHO: rever com advogado de direito bancário antes de publicar. -->
+<Layout form={false} title={seo.title} description={seo.description}>
+  <section class="page-head">
+    <div class="container">
+      <h1>Aviso legal</h1>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="prose prose--center">
+        <h2>Quem somos</h2>
+        <p>
+          O {SITE.name} ({SITE.domain}) é uma plataforma de informação, simulação e comparação de crédito em Angola.
+          {
+            SITE.bnaRegistration
+              ? ` Intermediário de crédito registado no Banco Nacional de Angola com o n.º ${SITE.bnaRegistration}.`
+              : ''
+          }
+        </p>
+        <h2>O que não somos</h2>
+        <p>
+          Não somos um banco nem concedemos crédito. A análise, a aprovação, as condições e a TAEG finais são sempre
+          decididas pelo banco. Não garantimos a aprovação de nenhum pedido.
+        </p>
+        <h2>Simulações e dados dos bancos</h2>
+        <p>
+          As simulações são indicativas e usam prestações constantes. As taxas mostradas como exemplo não são ofertas.
+          Os dados dos bancos vêm dos documentos oficiais indicados em cada página e podem ter mudado. Confirme sempre a
+          informação em vigor junto do banco.
+        </p>
+        <h2>Dinheiro</h2>
+        <p>
+          Nunca lhe pedimos dinheiro para "libertar" um crédito e não recebemos nem entregamos valores relacionados
+          com o seu contrato de crédito. Se alguém em nosso nome lhe pedir dinheiro, não pague e contacte-nos em
+          {' '}<a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        </p>
+        <h2>Contactos</h2>
+        <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      </div>
+    </div>
+  </section>
+</Layout>

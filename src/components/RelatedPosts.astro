@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  /** 'mix' = o artigo mais recente de cada tipo de crédito */
+  categoria: 'pessoal' | 'automovel' | 'habitacao' | 'geral' | 'mix';
+  exclude?: string;
+  title?: string;
+}
+const { categoria, exclude, title = 'Para ler a seguir' } = Astro.props;
+
+const LABEL: Record<string, string> = {
+  pessoal: 'Crédito pessoal',
+  automovel: 'Crédito automóvel',
+  habitacao: 'Crédito habitação',
+  geral: 'Guia geral',
+};
+
+const all = (await getCollection('blog'))
+  .filter((p) => p.id !== exclude)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+let posts: typeof all = [];
+if (categoria === 'mix') {
+  for (const c of ['pessoal', 'automovel', 'habitacao']) {
+    const first = all.find((p) => p.data.categoria === c);
+    if (first) posts.push(first);
+  }
+} else {
+  posts = all.filter((p) => p.data.categoria === categoria).slice(0, 3);
+  for (const p of all) {
+    if (posts.length >= 3) break;
+    if (!posts.includes(p)) posts.push(p);
+  }
+}
+---
+
+{
+  posts.length > 0 ? (
+    <section class="section" aria-labelledby="ler-mais">
+      <div class="container">
+        <div class="section__head">
+          <h2 id="ler-mais">{title}</h2>
+          <p>Guias simples para decidir com confiança.</p>
+        </div>
+        <div class="posts">
+          {posts.map((p) => (
+            <a class="post" href={`/blog/${p.id}`}>
+              <span class="pill">{LABEL[p.data.categoria]}</span>
+              <h3>{p.data.title}</h3>
+              <p>{p.data.description}</p>
+              <span class="post__more">Ler artigo</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null
+}

@@ -1,0 +1,399 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Simulator from './Simulator.astro';
+import Faq from './Faq.astro';
+import Icon from './Icon.astro';
+import Photo from './Photo.astro';
+import { PRODUCTS, type ProductKey } from '../data/products';
+import { BANKS } from '../data/banks';
+import { SEO } from '../data/seo';
+import { SITE } from '../data/site';
+import { payment, taeg, fmtKz, fmtNum, fmtPct, fmtPrazo } from '../lib/finance';
+
+interface Props {
+  produto: ProductKey;
+}
+const { produto } = Astro.props;
+const p = PRODUCTS[produto];
+const seo = SEO[p.path];
+const nomeL = p.nome.toLowerCase();
+const url = new URL(p.path, SITE.url).toString();
+
+// Exemplo "exatamente quanto vai pagar"
+const pmt = payment(p.sim.valor, p.sim.taxa, p.sim.prazo);
+const total = pmt * p.sim.prazo;
+const juros = total - p.sim.valor;
+const taegEst = taeg(p.sim.valor, pmt, p.sim.prazo, 0.1);
+const rows = p.exemplo.valores.map((v) => ({
+  v,
+  cells: p.exemplo.prazos.map((m) => payment(v, p.exemplo.taxa, m)),
+}));
+
+const bancosPessoal = BANKS.filter((b) => b.published && b.docs);
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url,
+    url,
+    name: seo.title,
+    description: seo.description,
+    inLanguage: 'pt-AO',
+    isPartOf: { '@id': `${SITE.url}/#site` },
+    dateModified: new Date().toISOString().slice(0, 10),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialProduct',
+    name: p.nome,
+    description: seo.description,
+    url,
+    category: 'Crédito',
+    areaServed: { '@type': 'Country', name: 'Angola' },
+    feesAndCommissionsSpecification: 'Simular e enviar o pedido não custa nada.',
+    broker: { '@id': `${SITE.url}/#org` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: `Como pedir ${nomeL} em Angola`,
+    step: p.etapas.map((e, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: e.titulo,
+      text: e.texto,
+    })),
+  },
+];
+---
+
+<Layout
+  title={seo.title}
+  description={seo.description}
+  schema={schema}
+  form={p.key}
+  related={{ categoria: p.key }}
+>
+  <!-- 1. Promessa clara -->
+  <section class="hero">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: p.nome }]} />
+    </div>
+    <div class="container hero__head">
+      <h1 class="hero__title">{p.h1}</h1>
+      <p class="hero__lead">{seo.description}</p>
+    </div>
+    <div class="container hero__grid">
+      <div class="hero__media">
+        <Photo name={p.photo.name} alt={p.photo.alt} brief={p.photo.brief} ratio="1 / 1" loading="eager" />
+        <div class="btn-row">
+          <a class="btn btn--green" href="#pedir">{p.cta}</a>
+          <a class="btn btn--ghost" href="#simular">Simular a prestação</a>
+        </div>
+      </div>
+      <div id="simular">
+        <Simulator produto={p.key} title={`Simule o ${nomeL} online`} {...p.sim} />
+      </div>
+    </div>
+  </section>
+
+  <section class="benefits" aria-label="Vantagens">
+    <div class="container">
+      <ul>
+        <li><span class="tick"><Icon name="check" /></span>Veja quanto vai pagar, em kwanzas, antes de pedir</li>
+        <li><span class="tick"><Icon name="check" /></span>Saiba que documentos levar e não volte ao balcão</li>
+        <li><span class="tick"><Icon name="check" /></span>Perceba quanto tempo demora a aprovação do crédito</li>
+        <li><span class="tick"><Icon name="check" /></span>Saiba quando o dinheiro entra na conta</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. As 4 respostas -->
+  <section class="section" aria-labelledby="respostas">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="respostas">As 4 respostas que procura antes de pedir <em>{nomeL}</em></h2>
+        <p>Reunimos o que o banco só explica ao balcão, para decidir com calma e sem surpresas.</p>
+      </div>
+      <div class="answers">
+        <article class="answer">
+          <h3>Quanto vai pagar</h3>
+          <p class="answer__big">{fmtNum(pmt)} Kz por mês</p>
+          <p>
+            Num crédito de {fmtKz(p.sim.valor)} a {fmtPrazo(p.sim.prazo)}, com uma TAN de exemplo de {fmtPct(p.sim.taxa)}.
+            Mude o valor e o prazo no simulador.
+          </p>
+          <a href="#quanto-paga">Ver a tabela de prestações</a>
+        </article>
+        <article class="answer">
+          <h3>Que documentos precisa</h3>
+          <p class="answer__big">{p.documentos.length} documentos</p>
+          <p>{p.respostas.documentos}</p>
+          <a href="#documentos">Ver a lista completa</a>
+        </article>
+        <article class="answer">
+          <h3>Quanto tempo demora a aprovação</h3>
+          <p class="answer__big">{p.prazoResposta ?? 'Depende do banco'}</p>
+          <p>{p.respostas.tempo}</p>
+          <a href="#prazos">Ver as etapas</a>
+        </article>
+        <article class="answer">
+          <h3>Quando o dinheiro entra na conta</h3>
+          <p class="answer__big">{p.prazoDinheiro ?? 'Após assinar'}</p>
+          <p>{p.respostas.dinheiro}</p>
+          <a href="#prazos">Ver as etapas</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Quanto vai pagar -->
+  <section class="section section--tint" id="quanto-paga" aria-labelledby="h-quanto">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-quanto">Quanto vai pagar por mês no <em>{nomeL}</em></h2>
+        <p>
+          A prestação depende de três coisas: o valor que pede, o prazo e a taxa do banco. Esta tabela mostra exemplos com uma TAN de {fmtPct(p.exemplo.taxa)}. Não é uma oferta: a taxa real é a da proposta do banco.
+        </p>
+      </div>
+      <div class="split split--wide">
+        <div class="table-wrap">
+          <table class="data">
+            <caption>Prestação mensal estimada do {nomeL} (em kwanzas)</caption>
+            <thead>
+              <tr>
+                <th scope="col">Valor do crédito</th>
+                {p.exemplo.prazos.map((m) => <th class="num" scope="col">{m} meses</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                rows.map((r) => (
+                  <tr>
+                    <th scope="row">{fmtKz(r.v)}</th>
+                    {r.cells.map((c) => <td class="num">{fmtNum(c)} Kz</td>)}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <caption>O exemplo do simulador, passo a passo</caption>
+            <tbody>
+              <tr><th scope="row">Valor do crédito</th><td class="num">{fmtKz(p.sim.valor)}</td></tr>
+              <tr><th scope="row">Prazo</th><td class="num">{fmtPrazo(p.sim.prazo)}</td></tr>
+              <tr><th scope="row">Taxa de juro anual (TAN)</th><td class="num">{fmtPct(p.sim.taxa)}</td></tr>
+              <tr><th scope="row">Prestação mensal</th><td class="num">{fmtKz(pmt)}</td></tr>
+              <tr><th scope="row">Total a pagar</th><td class="num">{fmtKz(total)}</td></tr>
+              <tr><th scope="row">Custo do crédito (juros)</th><td class="num">{fmtKz(juros)}</td></tr>
+              <tr><th scope="row">TAEG estimada</th><td class="num">{fmtPct(taegEst)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card card--row">
+      <div>
+      <h3>Como ler estes números</h3>
+      <ul class="checklist">
+        <li><span class="tick"><Icon name="check" /></span><span>O <strong>total a pagar</strong> é a prestação multiplicada pelos meses. É o número que mais pesa na decisão.</span></li>
+        <li><span class="tick"><Icon name="check" /></span><span>A <strong>TAEG</strong> junta os juros e os encargos num só valor. Compare propostas por ela, e não só pela taxa.</span></li>
+        <li><span class="tick"><Icon name="check" /></span><span>Um prazo maior baixa a prestação, mas aumenta os juros. Teste os dois no simulador.</span></li>
+      </ul>
+      </div>
+      <div class="btn-col">
+        <a class="btn btn--green" href="#pedir">Pedir o meu crédito com este valor</a>
+        <a class="btn btn--ghost" href="/blog/o-que-e-a-taeg">Perceber a TAEG</a>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Documentos -->
+  <section class="section" id="documentos" aria-labelledby="h-docs">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-docs">Documentos para pedir <em>{nomeL}</em></h2>
+        <p>Um pedido só avança quando está completo. Prepare isto e poupe viagens ao banco.</p>
+      </div>
+      <div class="split split--even">
+        <div class="card">
+          <h3>Lista de documentos</h3>
+          <ul class="checklist">
+            {p.documentos.map((d) => <li><span class="tick"><Icon name="check" /></span><span>{d}</span></li>)}
+          </ul>
+          <p class="muted">{p.documentosNota}</p>
+        </div>
+        <div>
+          <div class="card">
+          <h3>Dicas para o pedido ser aceite</h3>
+          <ol>
+            <li>Reúna todos os documentos antes de ir ao banco ou de nos contactar.</li>
+            <li>Confirme que os recibos de salário e a morada estão atualizados.</li>
+            <li>Peça-nos a lista do seu banco: dizemos-lhe o que falta no seu caso.</li>
+            <li>Guarde cópia de tudo o que entregar.</li>
+          </ol>
+          <a class="btn btn--green" href="#pedir">Receber a lista do meu banco</a>
+          </div>
+          <Photo name="documentos" alt="Pessoa a organizar os documentos do pedido de crédito em casa" brief="Pessoa angolana a organizar papéis e recibos numa mesa, com um sorriso, a preparar o pedido." ratio="4 / 3" />
+        </div>
+      </div>
+      {
+        produto === 'pessoal' && bancosPessoal.length > 0 ? (
+          <div class="table-wrap" style="margin-top:2rem">
+            <table class="data">
+              <caption>O que o BFA e o BAI pedem no crédito pessoal (segundo os próprios bancos)</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Banco</th>
+                  <th scope="col">Documentos</th>
+                  <th scope="col">Requisitos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bancosPessoal.map((b) => (
+                  <tr>
+                    <th scope="row">{b.name}</th>
+                    <td>
+                      <ul>{b.docs!.map((d) => <li>{d}</li>)}</ul>
+                    </td>
+                    <td>
+                      <ul>{(b.requisitos ?? []).map((r) => <li>{r}</li>)}</ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null
+      }
+    </div>
+  </section>
+
+  <!-- 5. Quanto tempo demora -->
+  <section class="section section--tint" id="prazos" aria-labelledby="h-prazos">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-prazos">Do pedido ao dinheiro na conta: <em>as 5 etapas</em></h2>
+        <p>
+          Nenhum banco garante um prazo igual para todos os casos. O que muda o tempo é o pedido estar completo, o rendimento ser fácil de comprovar e o banco ter a documentação certa.
+        </p>
+      </div>
+      <div class="split split--even">
+      <ol class="timeline">
+        {p.etapas.map((e) => <li><h3>{e.titulo}</h3><p>{e.texto}</p></li>)}
+      </ol>
+      <div class="card">
+      <h3>O que acelera o seu crédito</h3>
+      <ul class="checklist">
+        <li><span class="tick"><Icon name="check" /></span><span>Documentos completos e atualizados desde o primeiro dia</span></li>
+        <li><span class="tick"><Icon name="check" /></span><span>Rendimento e morada fáceis de comprovar</span></li>
+        <li><span class="tick"><Icon name="check" /></span><span>Conta no banco há tempo suficiente e sem incumprimentos</span></li>
+        <li><span class="tick"><Icon name="check" /></span><span>Um valor e um prazo realistas para o seu rendimento</span></li>
+      </ul>
+      <div class="btn-row">
+        <a class="btn btn--green" href="#pedir">Saber o prazo previsto do meu banco</a>
+      </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. StoryBrand: problema, guia, plano, sucesso e fracasso -->
+  <section class="section" aria-labelledby="h-historia">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-historia">Pedir crédito não devia ser <em>um labirinto</em></h2>
+        <p>{p.problema}</p>
+      </div>
+      <div class="split">
+        <div>
+          <h3>Nós fazemos o caminho consigo</h3>
+          <p>
+            O {SITE.name} junta o simulador, a lista de documentos e o pedido num só sítio. Tudo em kwanzas, com as regras do Banco Nacional de Angola à vista: o banco decide, nós organizamos e acompanhamos.
+          </p>
+          <ol class="steps steps--compact">
+            <li class="step"><h3>Simule</h3><p>Escolha o valor e o prazo e veja a prestação.</p></li>
+            <li class="step"><h3>Responda a 5 perguntas</h3><p>Em 3 minutos, começando pelo seu contacto. Sem BI nem dados bancários.</p></li>
+            <li class="step"><h3>Acompanhe</h3><p>Falamos consigo por WhatsApp até haver resposta.</p></li>
+          </ol>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <caption>Pedir sozinho ou com o {SITE.name}</caption>
+            <thead>
+              <tr>
+                <th scope="col">O que importa</th>
+                <th scope="col">Sozinho</th>
+                <th scope="col">Com o {SITE.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Ver a prestação e a TAEG antes de começar</th><td class="no">Só depois de falar com o banco</td><td class="yes">Sim, no simulador</td></tr>
+              <tr><th scope="row">Saber os documentos certos</th><td class="no">Descobre ao balcão e pode ter de voltar</td><td class="yes">Lista indicada antes de avançar</td></tr>
+              <tr><th scope="row">Organizar o pedido</th><td class="no">Faz tudo sozinho</td><td class="yes">Organizamos e enviamos ao banco</td></tr>
+              <tr><th scope="row">Acompanhamento</th><td class="no">Telefonar ou voltar ao balcão</td><td class="yes">Por WhatsApp</td></tr>
+              <tr><th scope="row">Custo de simular e pedir</th><td class="no">Sem custo</td><td class="yes">Sem custo</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Oferta -->
+  <section class="section" aria-labelledby="h-oferta">
+    <div class="container">
+      <div class="offer on-dark">
+        <div>
+          <h2 id="h-oferta">O pedido de {nomeL} <em>sem complicações</em></h2>
+          <ul class="ticks">
+            <li><span class="tick"><Icon name="check" /></span>Simulação com prestação, total a pagar e TAEG estimada</li>
+            <li><span class="tick"><Icon name="check" /></span>Lista de documentos à medida do seu caso e do seu banco</li>
+            <li><span class="tick"><Icon name="check" /></span>Pedido organizado e enviado ao banco por nós</li>
+            <li><span class="tick"><Icon name="check" /></span>Acompanhamento por WhatsApp até haver resposta</li>
+            <li><span class="tick"><Icon name="check" /></span>Sem compromisso: só assina se gostar da proposta</li>
+          </ul>
+        </div>
+        <div class="offer__price">
+          <p>Para simular e enviar o pedido</p>
+          <strong>0 Kz</strong>
+          <p>Se houver algum custo pelo nosso serviço, dizemos-lho por escrito antes de avançar.</p>
+          <a class="btn btn--green btn--block" href="#pedir">{p.cta}</a>
+        </div>
+      </div>
+      <p class="small muted" style="margin-top:1rem">
+        Os bancos mudam taxas e condições com frequência. Simule hoje para ver os números atuais e decida com tempo.
+      </p>
+    </div>
+  </section>
+
+  <!-- 8. FAQ -->
+  <section class="section section--tint" aria-labelledby="h-faq">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-faq">Perguntas frequentes sobre <em>{nomeL}</em></h2>
+      </div>
+      <Faq items={p.faq} />
+      <div class="sources">
+        <h4>Fontes oficiais</h4>
+        <ul>
+          {p.fontes.map((f) => <li><a href={f.url} rel="noopener nofollow">{f.label}</a></li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta on-dark">
+    <div class="container cta__inner">
+      <div>
+        <h2>Pronto para saber o seu número?</h2>
+        <p>Responda a 5 perguntas e fale com quem trata do seu crédito.</p>
+      </div>
+      <a class="btn btn--green" href="#pedir">{p.cta}</a>
+    </div>
+  </section>
+</Layout>

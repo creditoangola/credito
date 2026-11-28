@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../data/site';
+import { SEO } from '../data/seo';
+const seo = SEO['/termos'];
+---
+
+<!-- RASCUNHO: rever com advogado antes de publicar. -->
+<Layout form={false} title={seo.title} description={seo.description}>
+  <section class="page-head">
+    <div class="container">
+      <h1>Termos de utilização</h1>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="prose prose--center">
+        <h2>Uso do site</h2>
+        <p>
+          O {SITE.name} é de uso gratuito para simular e comparar crédito. Ao usar o site, aceita estas condições.
+        </p>
+        <h2>Informação indicativa</h2>
+        <p>
+          O conteúdo do site é informativo. As simulações e as taxas de exemplo não são propostas contratuais. As condições
+          finais constam da proposta do banco.
+        </p>
+        <h2>Pedidos de crédito</h2>
+        <p>
+          Enviar um pedido não cria nenhum contrato de crédito nem garante aprovação. A decisão é do banco.
+        </p>
+        <h2>Propriedade</h2>
+        <p>Os textos, o design e a marca do site pertencem ao {SITE.name}. Não pode copiá-los sem autorização.</p>
+        <h2>Contactos</h2>
+        <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      </div>
+    </div>
+  </section>
+</Layout>

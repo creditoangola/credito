@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Faq from '../components/Faq.astro';
+import { SEO } from '../data/seo';
+import { SITE } from '../data/site';
+
+const seo = SEO['/contactos'];
+const url = `${SITE.url}/contactos`;
+const hasPhone = SITE.whatsapp && SITE.whatsapp !== '244900000000';
+
+const faq = [
+  {
+    q: 'Qual é a forma mais rápida de falar convosco?',
+    a: 'O WhatsApp. Diga o seu nome, o produto que procura e o valor aproximado, e respondemos com os próximos passos.',
+  },
+  {
+    q: 'Preciso de pedir o crédito para vos contactar?',
+    a: 'Não. Pode perguntar sobre documentos, prazos ou custos sem compromisso e sem custo.',
+  },
+  {
+    q: 'Alguém em vosso nome me pediu dinheiro. O que faço?',
+    a: 'Não pague. Nunca pedimos dinheiro para libertar um pedido. Escreva-nos para o email indicado nesta página.',
+  },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': url,
+    url,
+    name: seo.title,
+    description: seo.description,
+    inLanguage: 'pt-AO',
+    isPartOf: { '@id': `${SITE.url}/#site` },
+    mainEntity: {
+      '@type': 'Organization',
+      name: SITE.name,
+      url: SITE.url,
+      email: SITE.email,
+      areaServed: { '@type': 'Country', name: 'Angola' },
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          contactType: 'customer support',
+          email: SITE.email,
+          availableLanguage: 'pt',
+          areaServed: 'AO',
+          ...(hasPhone ? { telephone: `+${SITE.whatsapp}` } : {}),
+        },
+      ],
+    },
+  },
+];
+---
+
+<Layout title={seo.title} description={seo.description} schema={schema} form="pessoal" related={{ categoria: 'mix' }}>
+  <section class="page-head">
+    <div class="container">
+      <h1>Contactos: <em>fale connosco sobre o seu crédito online</em></h1>
+      <p>{seo.description}</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-canais">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-canais">Escolha o canal que lhe é <em>mais fácil</em></h2>
+        <p>Pode escrever a qualquer hora. Para respondermos mais depressa, diga o seu nome, o produto e o valor aproximado.</p>
+      </div>
+      <div class="answers answers--3">
+        <article class="answer">
+          <h3>WhatsApp</h3>
+          <p>O canal mais rápido para dúvidas sobre documentos, prazos e custos.</p>
+          <a class="btn btn--green" href={`https://wa.me/${SITE.whatsapp}`} rel="noopener">Falar no WhatsApp</a>
+        </article>
+        <article class="answer">
+          <h3>Email</h3>
+          <p>Para perguntas mais longas, ou para pedir a eliminação dos seus dados.</p>
+          <a class="btn btn--ghost" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </article>
+        <article class="answer">
+          <h3>Pedido online</h3>
+          <p>Prefere que lhe liguemos? Deixe o contacto e responda a 5 perguntas curtas.</p>
+          <a class="btn btn--ghost" href="#pedir">Pedir crédito online</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" aria-labelledby="h-seguranca">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-seguranca">Fale só com quem é <em>de confiança</em></h2>
+        <p>
+          Nunca lhe pedimos dinheiro para libertar um pedido e não recebemos nem entregamos valores do seu contrato com o banco. Se alguém em nosso nome o fizer, não pague e escreva-nos para {SITE.email}. Respondemos com os próximos passos e, quando for o caso, com a lista exata de papéis que o seu banco pede.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-faq">
+    <div class="container">
+      <div class="section__head">
+        <h2 id="h-faq">Perguntas sobre os <em>contactos</em></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+</Layout>

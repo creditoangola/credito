@@ -1,0 +1,24 @@
+---
+interface Props {
+  href?: string;
+}
+const { href = '#pedir' } = Astro.props;
+---
+
+<div class="sticky-cta" data-sticky data-hidden="false">
+  <a class="btn btn--green btn--block" href={href}>Pedir em 3 minutos</a>
+</div>
+
+<script>
+  // Esconde a barra quando o formulário já está à vista
+  const bar = document.querySelector<HTMLElement>('[data-sticky]');
+  const target = document.getElementById('pedir');
+  if (bar && target && 'IntersectionObserver' in window) {
+    new IntersectionObserver(
+      (entries) => {
+        bar.dataset.hidden = String(entries.some((e) => e.isIntersecting));
+      },
+      { threshold: 0.05 },
+    ).observe(target);
+  }
+</script>

@@ -1,0 +1,114 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/figtree';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LeadWizard from '../components/LeadWizard.astro';
+import RelatedPosts from '../components/RelatedPosts.astro';
+import StickyCta from '../components/StickyCta.astro';
+import { SITE } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+  schema?: object | object[];
+  /** Produto pré-escolhido no formulário do fim da página. false = sem formulário. */
+  form?: 'pessoal' | 'automovel' | 'habitacao' | false;
+  /** Artigos no fim da página */
+  related?: { categoria: 'pessoal' | 'automovel' | 'habitacao' | 'geral' | 'mix'; exclude?: string } | null;
+  /** Destino do botão do cabeçalho e da barra fixa */
+  ctaHref?: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, noindex = false, schema, form = 'pessoal', related = null, ctaHref, ogType = 'website' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const cta = ctaHref ?? (form === false ? '/pedir-credito' : '#pedir');
+const ogImage = `${SITE.url}/og.png`;
+
+const base = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${SITE.url}/#org`,
+    name: SITE.name,
+    alternateName: ['Credito.ao', 'credito.ao'],
+    url: SITE.url,
+    email: SITE.email,
+    areaServed: { '@type': 'Country', name: 'Angola' },
+    knowsAbout: ['crédito pessoal', 'crédito automóvel', 'crédito habitação', 'TAEG', 'simulação de crédito'],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE.url}/#site`,
+    name: SITE.name,
+    url: SITE.url,
+    inLanguage: 'pt-AO',
+    publisher: { '@id': `${SITE.url}/#org` },
+  },
+];
+const extra = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
+const graph = [...base, ...extra];
+---
+
+<!doctype html>
+<html lang="pt-AO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="pt-AO" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
+    <meta name="theme-color" content="#367e3b" />
+    <meta name="geo.country" content="AO" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {SITE.googleVerification ? <meta name="google-site-verification" content={SITE.googleVerification} /> : null}
+    {SITE.bingVerification ? <meta name="msvalidate.01" content={SITE.bingVerification} /> : null}
+    {SITE.yandexVerification ? <meta name="yandex-verification" content={SITE.yandexVerification} /> : null}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="pt_AO" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <script type="application/ld+json" set:html={JSON.stringify(graph)} />
+  </head>
+  <body>
+    <a class="skip" href="#conteudo">Saltar para o conteúdo</a>
+    <Header ctaHref={cta} />
+    <main id="conteudo">
+      <slot />
+      {
+        form !== false ? (
+          <section class="section section--tint" id="pedir" aria-labelledby="pedir-titulo">
+            <div class="container">
+              <div class="section__head">
+                <h2 id="pedir-titulo">
+                  Peça o seu crédito em <em>3 minutos</em>
+                </h2>
+                <p>Responda a 5 perguntas simples. Começamos pelo seu contacto e só avança se quiser.</p>
+              </div>
+              <LeadWizard produto={form} />
+            </div>
+          </section>
+        ) : null
+      }
+      {related ? <RelatedPosts categoria={related.categoria} exclude={related.exclude} /> : null}
+    </main>
+    <Footer />
+    <StickyCta href={cta} />
+  </body>
+</html>

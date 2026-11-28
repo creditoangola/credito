@@ -1,0 +1,23 @@
+---
+import { SITE } from '../data/site';
+
+interface Props {
+  /** Último item sem href = página atual */
+  crumbs: { name: string; href?: string }[];
+}
+const { crumbs } = Astro.props;
+const all = [{ name: 'Início', href: '/' }, ...crumbs];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: all.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: new URL(c.href ?? Astro.url.pathname, SITE.url).toString(),
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  /** Nome do ficheiro em src/assets/photos, sem extensão (ex.: "hero-pessoal") */
+  name: string;
+  /** Descrição real da fotografia final (acessibilidade e SEO) */
+  alt: string;
+  ratio?: string;
+  /** Orientação para quem fotografa/escolhe a imagem. Só aparece em desenvolvimento. */
+  brief?: string;
+  loading?: 'eager' | 'lazy';
+}
+
+const { name, alt, ratio = '4 / 3', brief = '', loading = 'lazy' } = Astro.props;
+
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/photos/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+});
+const match = Object.entries(files).find(
+  ([path]) => path.split('/').pop()!.replace(/\.[^.]+$/, '') === name,
+);
+const img = match?.[1].default;
+---
+
+{
+  img ? (
+    <figure class="photo" style={`aspect-ratio:${ratio}`}>
+      <Image
+        src={img}
+        alt={alt}
+        widths={[480, 800, 1200]}
+        sizes="(max-width: 960px) 100vw, 600px"
+        loading={loading}
+        decoding="async"
+      />
+    </figure>
+  ) : (
+    <figure class="photo photo--empty" style={`aspect-ratio:${ratio}`} aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <circle cx="32" cy="32" r="24"></circle>
+        <path d="M22 38c3 5 6 7 10 7s7-2 10-7"></path>
+        <path d="M23 25h.01M41 25h.01"></path>
+      </svg>
+      {import.meta.env.DEV && brief ? <figcaption class="photo__brief">Foto em falta ({name}): {brief}</figcaption> : null}
+    </figure>
+  )
+}

@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { getCollection } from 'astro:content';
+import { SEO } from '../../data/seo';
+
+const seo = SEO['/blog'];
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const grupos = [
+  { c: 'pessoal', titulo: 'Crédito pessoal', curto: 'Pessoal', link: '/credito-pessoal', cta: 'Simular o pessoal' },
+  { c: 'automovel', titulo: 'Crédito automóvel', curto: 'Automóvel', link: '/credito-automovel', cta: 'Simular o automóvel' },
+  { c: 'habitacao', titulo: 'Crédito habitação', curto: 'Habitação', link: '/credito-habitacao', cta: 'Simular a habitação' },
+  { c: 'geral', titulo: 'Guias gerais', curto: 'Geral', link: '/simulador', cta: 'Simular o crédito online' },
+];
+---
+
+<Layout title={seo.title} description={seo.description} form="pessoal">
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Blog' }]} />
+      <h1>Blog de crédito online em Angola: <em>guias para decidir bem</em></h1>
+      <p>{seo.description}</p>
+      <p>Cada guia usa números em kwanzas e fontes dos próprios bancos. Leia primeiro o que corresponde ao seu caso, simule a prestação e só depois decida. Os exemplos usam taxas ilustrativas e a taxa final é sempre a do banco. Novos guias são publicados com regularidade, por isso volte sempre que precisar de comparar bancos, perceber um custo, preparar uma conversa com o gestor ou confirmar se um papel é mesmo necessário antes de ir ao balcão.</p>
+    </div>
+  </section>
+
+  {
+    grupos.map((g, i) => {
+      const lista = posts.filter((p) => p.data.categoria === g.c);
+      return lista.length ? (
+        <section class={`section ${i % 2 === 0 ? '' : 'section--tint'}`} aria-labelledby={`h-${g.c}`}>
+          <div class="container">
+            <div class="section__head">
+              <h2 id={`h-${g.c}`}>{g.titulo}</h2>
+              <p><a href={g.link}>{g.cta}</a></p>
+            </div>
+            <div class="posts">
+              {lista.map((p) => (
+                <a class="post" href={`/blog/${p.id}`}>
+                  <span class="pill">{g.curto}</span>
+                  <h3>{p.data.title}</h3>
+                  <p>{p.data.description}</p>
+                  <span class="post__more">Ler artigo</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null;
+    })
+  }
+</Layout>

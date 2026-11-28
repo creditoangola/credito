@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Simulator from '../components/Simulator.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { SEO } from '../data/seo';
+import { SITE } from '../data/site';
+
+const seo = SEO['/simulador'];
+const faq = [
+  {
+    q: 'O simulador de crédito é grátis?',
+    a: 'Sim. Pode simular quantas vezes quiser, sem dar o nome nem o telefone.',
+  },
+  {
+    q: 'A taxa do simulador é a que vou pagar?',
+    a: 'Não. A taxa de partida é um exemplo. A taxa e a TAEG finais constam da proposta do banco, que lhe deve ser entregue antes de assinar.',
+  },
+  {
+    q: 'Como se calcula a prestação do crédito?',
+    a: 'Com prestações constantes: o valor pedido, a taxa de juro e o número de meses determinam o valor que paga por mês.',
+  },
+];
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Simulador de crédito em kwanzas',
+  url: `${SITE.url}/simulador`,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Web',
+  inLanguage: 'pt-AO',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'AOA' },
+};
+---
+
+<Layout title={seo.title} description={seo.description} schema={schema} form="pessoal" related={{ categoria: 'geral' }}>
+  <section class="page-head">
+    <div class="container">
+      <Breadcrumbs crumbs={[{ name: 'Simulador' }]} />
+      <h1>Simulador de crédito online: <em>veja quanto vai pagar</em></h1>
+      <p>{seo.description}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <Simulator produto="pessoal" title="Simule o seu crédito" />
+      <div class="prose">
+        <h2>Como ler o resultado da simulação</h2>
+        <ul>
+          <li><strong>Prestação mensal:</strong> o que paga todos os meses, com prestações constantes.</li>
+          <li><strong>Total a pagar:</strong> a soma de todas as prestações até ao fim do contrato.</li>
+          <li><strong>Custo total:</strong> a diferença entre o total a pagar e o valor que recebe.</li>
+          <li><strong>TAEG estimada:</strong> o custo anual com juros e encargos iniciais. É o número para comparar propostas.</li>
+        </ul>
+        <div class="notice">
+          <p>
+            Simulação indicativa. A taxa de partida é um exemplo e não uma oferta. A proposta do banco indica a taxa, a TAEG e os encargos reais.
+          </p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn--green" href="#pedir">Pedir este crédito</a>
+          <a class="btn btn--ghost" href="/blog/o-que-e-a-taeg">Perceber a TAEG</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <div class="section__head">
+        <h2>Prestação por <em>produto</em></h2>
+        <p>Cada produto tem valores e prazos diferentes. Veja os exemplos de cada um.</p>
+      </div>
+      <ul class="list">
+        <li class="list__item"><div><h3>Pessoal</h3><p>Obras, estudos, saúde e imprevistos.</p></div><a class="btn btn--ghost btn--small" href="/credito-pessoal">Ver prestações</a></li>
+        <li class="list__item"><div><h3>Automóvel</h3><p>Carro novo ou usado.</p></div><a class="btn btn--ghost btn--small" href="/credito-automovel">Ver prestações</a></li>
+        <li class="list__item"><div><h3>Habitação</h3><p>Comprar, construir ou transferir.</p></div><a class="btn btn--ghost btn--small" href="/credito-habitacao">Ver prestações</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>Perguntas frequentes sobre o <em>simulador</em></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+</Layout>
